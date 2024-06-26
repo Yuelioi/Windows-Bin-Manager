@@ -38,8 +38,13 @@ function Remove-SubfoldersFromPath {
     $response = Read-Host "Do you want to remove the following paths from PATH? `n$($pathsToRemove -join "`n")`n(y/n)"
     if ($response -eq "y") {
         foreach ($pathToRemove in $pathsToRemove) {
-            $currentPath = $currentPath -replace [Regex]::Escape($pathToRemove + ';'), ''
+            # Remove exact match of the folder path from PATH
+            $currentPath = $currentPath.Replace("$pathToRemove;", "")
+            $currentPath = $currentPath.Replace(";$pathToRemove", "")
+            $currentPath = $currentPath.Replace("$pathToRemove", "")
         }
+        # Remove any leading or trailing semicolons that might be left
+        $currentPath = $currentPath.Trim(';')
         [System.Environment]::SetEnvironmentVariable('Path', $currentPath, [System.EnvironmentVariableTarget]::Machine)
         Write-Output "PATH updated successfully"
     } else {
